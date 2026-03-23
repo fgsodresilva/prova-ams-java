@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prova Técnica — AMS Java</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+  :root {
+    --bg:#0d0f14; --surface:#13161d; --surface2:#1a1e28; --border:#252a38;
+    --accent:#4f8ef7; --accent2:#7c5cbf; --green:#3ecf72;
+    --yellow:#f5c842; --red:#f25c5c; --text:#e2e6f0; --muted:#6b7390; --card:#161b26;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;
+    user-select:none;-webkit-user-select:none;-moz-user-select:none}
+
+  /* Anti-cópia */
+  #cheat-alert{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:9999;align-items:center;justify-content:center}
+  #cheat-alert.show{display:flex}
+  #cheat-alert .box{background:var(--surface2);border:1px solid var(--red);border-radius:12px;padding:36px 40px;text-align:center;max-width:380px}
+  #cheat-alert .box h2{color:var(--red);font-size:1.1rem;margin-bottom:10px}
+  #cheat-alert .box p{color:var(--muted);font-size:.85rem;margin-bottom:20px;line-height:1.6}
+  #cheat-alert .box button{background:var(--red);color:#fff;border:none;border-radius:6px;padding:10px 28px;font-family:'Sora',sans-serif;font-size:.85rem;cursor:pointer}
+
+  /* Sending */
+  #sending-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:8000;align-items:center;justify-content:center;flex-direction:column;gap:16px}
+  #sending-overlay.show{display:flex}
+  .spinner{width:44px;height:44px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  #sending-overlay p{font-size:.85rem;color:var(--muted)}
+
+  /* Header */
+  header{background:linear-gradient(135deg,#0d1117,#161b26);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+  .header-inner{max-width:780px;margin:0 auto;padding:16px 24px;display:flex;align-items:center;justify-content:space-between}
+  .brand{display:flex;align-items:center;gap:12px}
+  .brand-dot{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  .brand-text{font-size:.76rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+  #timer{font-family:'JetBrains Mono',monospace;font-size:.95rem;font-weight:600;color:var(--accent);background:rgba(79,142,247,.08);border:1px solid rgba(79,142,247,.2);border-radius:8px;padding:6px 16px;letter-spacing:.05em;transition:color .3s,border-color .3s}
+  #timer.warn{color:var(--yellow);border-color:rgba(245,200,66,.3)}
+  #timer.danger{color:var(--red);border-color:rgba(242,92,92,.35);animation:blink .8s infinite}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.5}}
+
+  main{max-width:780px;margin:0 auto;padding:40px 24px 80px}
+
+  /* ID screen */
+  #id-screen{background:linear-gradient(135deg,#131a2e,#1a1428);border:1px solid var(--border);border-radius:16px;padding:48px 44px;max-width:520px;margin:60px auto 0}
+  .id-tag{display:inline-block;background:rgba(79,142,247,.1);border:1px solid rgba(79,142,247,.25);color:var(--accent);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;padding:4px 12px;border-radius:20px;margin-bottom:16px;font-weight:600}
+  #id-screen h2{font-size:1.4rem;font-weight:700;margin-bottom:8px;background:linear-gradient(135deg,#e2e6f0,#8ba4d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  #id-screen p{font-size:.83rem;color:var(--muted);margin-bottom:28px;line-height:1.7}
+  .field-group{display:flex;flex-direction:column;gap:14px;margin-bottom:28px}
+  .field-wrap label{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.09em;display:block;margin-bottom:6px}
+  .field-wrap input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;color:var(--text);font-family:'Sora',sans-serif;font-size:.88rem;outline:none;transition:border-color .2s;user-select:text;-webkit-user-select:text}
+  .field-wrap input:focus{border-color:var(--accent)}
+  .field-wrap input::placeholder{color:var(--muted)}
+  .field-error{font-size:.72rem;color:var(--red);margin-top:5px;display:none}
+  .field-error.show{display:block}
+  .start-btn{width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:10px;padding:15px;font-family:'Sora',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;letter-spacing:.04em;transition:opacity .2s,transform .1s;box-shadow:0 4px 20px rgba(79,142,247,.25)}
+  .start-btn:hover{opacity:.9;transform:translateY(-1px)}
+
+  /* Hero */
+  .hero{background:linear-gradient(135deg,#131a2e,#1a1428);border:1px solid var(--border);border-radius:16px;padding:32px 36px;margin-bottom:32px;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;top:-40px;right:-40px;width:200px;height:200px;background:radial-gradient(circle,rgba(79,142,247,.12) 0%,transparent 70%);border-radius:50%}
+  .hero-tag{display:inline-block;background:rgba(79,142,247,.1);border:1px solid rgba(79,142,247,.25);color:var(--accent);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;padding:4px 12px;border-radius:20px;margin-bottom:12px;font-weight:600}
+  .hero h1{font-size:1.4rem;font-weight:700;line-height:1.3;margin-bottom:8px;background:linear-gradient(135deg,#e2e6f0,#8ba4d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .hero p{font-size:.82rem;color:var(--muted);line-height:1.7}
+  .candidate-badge{display:flex;align-items:center;gap:10px;background:rgba(79,142,247,.06);border:1px solid rgba(79,142,247,.15);border-radius:8px;padding:10px 14px;margin-top:16px}
+  .candidate-badge .info{font-size:.77rem;color:var(--muted);line-height:1.5}
+  .candidate-badge .info strong{color:var(--text);display:block;font-size:.84rem}
+  .meta-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+  .meta-item{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;padding:10px 12px}
+  .meta-label{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px}
+  .meta-value{font-size:.88rem;font-weight:600;color:var(--text)}
+
+  /* Progress */
+  .progress-wrap{margin-bottom:26px}
+  .progress-label{display:flex;justify-content:space-between;font-size:.73rem;color:var(--muted);margin-bottom:6px}
+  .progress-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width .4s;width:0%}
+
+  /* Section */
+  .section-label{display:flex;align-items:center;gap:10px;margin-bottom:14px;margin-top:4px}
+  .section-badge{font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;padding:3px 10px;border-radius:20px}
+  .badge-easy{background:rgba(62,207,114,.12);color:var(--green);border:1px solid rgba(62,207,114,.25)}
+  .badge-mid{background:rgba(245,200,66,.12);color:var(--yellow);border:1px solid rgba(245,200,66,.25)}
+  .badge-hard{background:rgba(242,92,92,.12);color:var(--red);border:1px solid rgba(242,92,92,.25)}
+  .section-line{flex:1;height:1px;background:var(--border)}
+
+  /* Question */
+  .question-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px 24px 18px;margin-bottom:12px;transition:border-color .2s}
+  .question-card:hover{border-color:#2e3548}
+  .question-card.answered{border-color:rgba(79,142,247,.3)}
+  .q-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+  .q-number{min-width:28px;height:28px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:#fff;margin-top:1px}
+  .q-ref{font-size:.65rem;color:var(--muted);background:var(--surface2);border:1px solid var(--border);padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;white-space:nowrap;margin-top:3px}
+  .q-title-wrap{flex:1}
+  .q-title{font-size:.9rem;font-weight:600;line-height:1.55;color:var(--text);margin-bottom:4px}
+  .code-block{background:#0a0c10;border:1px solid #1e2433;border-radius:8px;padding:12px 14px;margin:10px 0 12px;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:#7ec8e3;line-height:1.7;overflow-x:auto;white-space:pre}
+  .sub-q{font-size:.82rem;color:var(--muted);margin-bottom:11px}
+  .options{display:flex;flex-direction:column;gap:7px}
+  .option{display:flex;align-items:flex-start;gap:11px;padding:11px 13px;border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .15s}
+  .option:hover{background:rgba(255,255,255,.03);border-color:#2e3548}
+  .option.selected{background:rgba(79,142,247,.08);border-color:rgba(79,142,247,.4)}
+  .option input[type="radio"]{display:none}
+  .opt-letter{min-width:23px;height:23px;border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;color:var(--muted);transition:all .15s;margin-top:1px}
+  .option.selected .opt-letter{background:var(--accent);border-color:var(--accent);color:#fff}
+  .opt-text{font-size:.82rem;color:var(--muted);line-height:1.5;transition:color .15s}
+  .option.selected .opt-text{color:var(--text)}
+
+  /* Submit */
+  .submit-wrap{margin-top:32px;text-align:center}
+  .submit-btn{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:10px;padding:14px 48px;font-family:'Sora',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;letter-spacing:.04em;transition:opacity .2s,transform .1s;box-shadow:0 4px 20px rgba(79,142,247,.25)}
+  .submit-btn:hover{opacity:.9;transform:translateY(-1px)}
+  .submit-btn:active{transform:translateY(0)}
+  .submit-note{font-size:.72rem;color:var(--muted);margin-top:10px}
+  .unanswered-msg{background:rgba(245,200,66,.08);border:1px solid rgba(245,200,66,.25);color:var(--yellow);border-radius:8px;padding:12px 16px;font-size:.8rem;margin-top:12px;display:none}
+  .unanswered-msg.show{display:block}
+
+  /* Result */
+  #result-screen{display:none}
+  #result-screen.show{display:block}
+  .result-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:44px 36px;text-align:center;margin-top:20px}
+  .result-candidate{font-size:.77rem;color:var(--muted);margin-bottom:20px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 16px;display:inline-block}
+  .result-score{font-size:3.2rem;font-weight:700;font-family:'JetBrains Mono',monospace;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px}
+  .result-label{font-size:.82rem;color:var(--muted);margin-bottom:20px}
+  .result-status{display:inline-block;padding:7px 22px;border-radius:20px;font-size:.82rem;font-weight:700;margin-bottom:20px}
+  .status-pass{background:rgba(62,207,114,.12);color:var(--green);border:1px solid rgba(62,207,114,.3)}
+  .status-fail{background:rgba(242,92,92,.12);color:var(--red);border:1px solid rgba(242,92,92,.3)}
+  .result-msg{font-size:.82rem;color:var(--muted);line-height:1.8;margin-bottom:24px}
+  .detail-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:.79rem}
+  .detail-row:last-child{border-bottom:none}
+  .detail-correct{color:var(--green);font-weight:600}
+  .detail-wrong{color:var(--red);font-weight:600}
+  .sent-notice{margin-top:20px;font-size:.75rem;border-radius:8px;padding:10px 14px;background:rgba(62,207,114,.06);border:1px solid rgba(62,207,114,.2);color:var(--green)}
+
+  @media(max-width:600px){
+    .meta-grid{grid-template-columns:1fr 1fr}
+    #id-screen,.hero{padding:24px 18px}
+    main{padding:18px 12px 60px}
+    .question-card{padding:18px 14px 14px}
+  }
+</style>
+</head>
+<body>
+
+<div id="cheat-alert">
+  <div class="box">
+    <h2>⚠️ Ação não permitida</h2>
+    <p>Esta prova não permite copiar, colar ou selecionar texto. Responda com base no seu próprio conhecimento.</p>
+    <button onclick="document.getElementById('cheat-alert').classList.remove('show')">Entendi</button>
+  </div>
+</div>
+
+<div id="sending-overlay">
+  <div class="spinner"></div>
+  <p>Enviando resultado… aguarde.</p>
+</div>
+
+<header>
+  <div class="header-inner">
+    <div class="brand"><div class="brand-dot"></div><span class="brand-text">Avaliação Técnica · AMS Java</span></div>
+    <div id="timer">45:00</div>
+  </div>
+</header>
+
+<main>
+
+  <!-- TELA DE IDENTIFICAÇÃO -->
+  <div id="id-screen">
+    <div class="id-tag">Antes de começar</div>
+    <h2>Identificação do Candidato</h2>
+    <p>Preencha seus dados abaixo. Eles serão registrados junto ao resultado e enviados ao avaliador.</p>
+    <div class="field-group">
+      <div class="field-wrap">
+        <label>Nome completo *</label>
+        <input type="text" id="f-nome" placeholder="Ex: João da Silva" autocomplete="off">
+        <span class="field-error" id="err-nome">Campo obrigatório</span>
+      </div>
+      <div class="field-wrap">
+        <label>Matrícula / ID *</label>
+        <input type="text" id="f-matricula" placeholder="Ex: 123456" autocomplete="off">
+        <span class="field-error" id="err-matricula">Campo obrigatório</span>
+      </div>
+      <div class="field-wrap">
+        <label>E-mail *</label>
+        <input type="email" id="f-email" placeholder="Ex: joao@email.com" autocomplete="off">
+        <span class="field-error" id="err-email">E-mail inválido</span>
+      </div>
+    </div>
+    <button class="start-btn" onclick="startQuiz()">Iniciar Prova →</button>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quiz-form" style="display:none">
+
+    <div class="hero">
+      <div class="hero-tag">Stefanini · Toyota AMS</div>
+      <h1>Prova Técnica de Sustentação de Sistemas</h1>
+      <p>Questões baseadas em cenários reais de suporte. Leia com atenção e selecione a alternativa correta.</p>
+      <div class="candidate-badge">
+        <span>👤</span>
+        <div class="info"><strong id="badge-nome">—</strong><span id="badge-info">—</span></div>
+      </div>
+      <div class="meta-grid">
+        <div class="meta-item"><div class="meta-label">Questões</div><div class="meta-value">10</div></div>
+        <div class="meta-item"><div class="meta-label">Duração</div><div class="meta-value">45 min</div></div>
+        <div class="meta-item"><div class="meta-label">Aprovação</div><div class="meta-value">≥ 6 acertos</div></div>
+      </div>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-label"><span>Progresso</span><span id="progress-text">0 de 10 respondidas</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    </div>
+
+    <!-- BÁSICO -->
+    <div class="section-label"><span class="section-badge badge-easy">🟢 Nível Básico</span><div class="section-line"></div></div>
+
+    <div class="question-card" id="card-1">
+      <div class="q-header"><div class="q-number">01</div><div class="q-title-wrap"><div class="q-title">Durante a importação do arquivo de organograma, o seguinte erro apareceu no log:</div><span class="q-ref">CP-5152</span></div></div>
+      <div class="code-block">Não foi encontrado o local-pai '1.TLAC-015061'
+[Linha] "020061.TLAC-015061.TLAC-015094 Advisor SR - Kazuhiro Umemoto"</div>
+      <div class="sub-q">O que esse erro indica sobre a causa raiz do problema?</div>
+      <div class="options" data-q="1" data-answer="b">
+        <label class="option"><input type="radio" name="q1" value="a"><span class="opt-letter">A</span><span class="opt-text">O arquivo está corrompido e precisa ser reenviado integralmente pelo usuário</span></label>
+        <label class="option"><input type="radio" name="q1" value="b"><span class="opt-letter">B</span><span class="opt-text">O registro filho está tentando ser importado sem que seu registro pai exista na base de dados</span></label>
+        <label class="option"><input type="radio" name="q1" value="c"><span class="opt-letter">C</span><span class="opt-text">O Tomcat não conseguiu fazer o parse do arquivo por falta de memória heap</span></label>
+        <label class="option"><input type="radio" name="q1" value="d"><span class="opt-letter">D</span><span class="opt-text">O banco de dados Oracle está indisponível no momento da importação</span></label>
+      </div>
+    </div>
+
+    <div class="question-card" id="card-2">
+      <div class="q-header"><div class="q-number">02</div><div class="q-title-wrap"><div class="q-title">No chamado CP-5152, a solicitante Caroline pediu que a importação fosse realizada no ambiente de HOMOLOG. O analista identificou erros porque colaboradores como <code style="font-family:'JetBrains Mono',monospace;color:var(--accent);font-size:.8rem">1/1/647509</code> não estavam cadastrados. Qual é a explicação correta?</div><span class="q-ref">CP-5152</span></div></div>
+      <div class="options" data-q="2" data-answer="b">
+        <label class="option"><input type="radio" name="q2" value="a"><span class="opt-letter">A</span><span class="opt-text">O arquivo enviado estava em formato inválido e incompatível com o sistema Senior</span></label>
+        <label class="option"><input type="radio" name="q2" value="b"><span class="opt-letter">B</span><span class="opt-text">O ambiente de homologação não possui espelhamento completo da base de produção, então alguns cadastros de referência não existem nele</span></label>
+        <label class="option"><input type="radio" name="q2" value="c"><span class="opt-letter">C</span><span class="opt-text">O Tomcat do ambiente de homologação estava desatualizado e rejeitou os registros</span></label>
+        <label class="option"><input type="radio" name="q2" value="d"><span class="opt-letter">D</span><span class="opt-text">O sistema Senior possui limite de linhas por importação e os registros excederam a cota</span></label>
+      </div>
+    </div>
+
+    <div class="question-card" id="card-3">
+      <div class="q-header"><div class="q-number">03</div><div class="q-title-wrap"><div class="q-title">Após a atualização de release do sistema FatoRH, o analista precisa verificar se a aplicação subiu corretamente no Tomcat. Qual arquivo deve ser consultado imediatamente após o restart?</div><span class="q-ref">Tomcat / FatoRH</span></div></div>
+      <div class="options" data-q="3" data-answer="c">
+        <label class="option"><input type="radio" name="q3" value="a"><span class="opt-letter">A</span><span class="opt-text">server.xml — contém o status dos conectores HTTP</span></label>
+        <label class="option"><input type="radio" name="q3" value="b"><span class="opt-letter">B</span><span class="opt-text">web.xml — registra os erros de inicialização dos servlets</span></label>
+        <label class="option"><input type="radio" name="q3" value="c"><span class="opt-letter">C</span><span class="opt-text">catalina.out — é o log principal de inicialização e runtime do Tomcat</span></label>
+        <label class="option"><input type="radio" name="q3" value="d"><span class="opt-letter">D</span><span class="opt-text">context.xml — registra as conexões com o banco de dados Oracle</span></label>
+      </div>
+    </div>
+
+    <!-- INTERMEDIÁRIO -->
+    <div class="section-label" style="margin-top:26px"><span class="section-badge badge-mid">🟡 Nível Intermediário</span><div class="section-line"></div></div>
+
+    <div class="question-card" id="card-4">
+      <div class="q-header"><div class="q-number">04</div><div class="q-title-wrap"><div class="q-title">No chamado CP-5018, a solução exigiu executar dois DELETEs em ordem específica: primeiro na tabela <code style="font-family:'JetBrains Mono',monospace;color:var(--accent);font-size:.8rem">tblIntegracao</code> e só depois na <code style="font-family:'JetBrains Mono',monospace;color:var(--accent);font-size:.8rem">tbesConsignado</code>. Por que essa ordem é obrigatória?</div><span class="q-ref">CP-5018</span></div></div>
+      <div class="options" data-q="4" data-answer="b">
+        <label class="option"><input type="radio" name="q4" value="a"><span class="opt-letter">A</span><span class="opt-text">O banco de dados processa comandos em fila e qualquer ordem produziria o mesmo resultado</span></label>
+        <label class="option"><input type="radio" name="q4" value="b"><span class="opt-letter">B</span><span class="opt-text">A tabela tblIntegracao referencia tbesConsignado; deletar primeiro em tbesConsignado violaria a integridade referencial</span></label>
+        <label class="option"><input type="radio" name="q4" value="c"><span class="opt-letter">C</span><span class="opt-text">O Oracle não permite deletar registros em tbesConsignado enquanto o Tomcat está em execução</span></label>
+        <label class="option"><input type="radio" name="q4" value="d"><span class="opt-letter">D</span><span class="opt-text">A tabela tbesConsignado tem maior volume e deve ser deletada por último por questões de performance</span></label>
+      </div>
+    </div>
+
+    <div class="question-card" id="card-5">
+      <div class="q-header"><div class="q-number">05</div><div class="q-title-wrap"><div class="q-title">Antes de executar os DELETEs no chamado CP-5018, o analista Alexandre solicitou que fosse executado primeiro um SELECT e que o resultado fosse enviado em Excel. Qual é o principal motivo técnico dessa prática?</div><span class="q-ref">CP-5018</span></div></div>
+      <div class="options" data-q="5" data-answer="c">
+        <label class="option"><input type="radio" name="q5" value="a"><span class="opt-letter">A</span><span class="opt-text">O Oracle exige que um SELECT preceda qualquer DELETE para liberar lock na tabela</span></label>
+        <label class="option"><input type="radio" name="q5" value="b"><span class="opt-letter">B</span><span class="opt-text">É uma exigência do sistema Senior para operações de limpeza de dados</span></label>
+        <label class="option"><input type="radio" name="q5" value="c"><span class="opt-letter">C</span><span class="opt-text">Validar e documentar exatamente quais registros serão afetados antes da exclusão, garantindo rastreabilidade e possibilidade de rollback</span></label>
+        <label class="option"><input type="radio" name="q5" value="d"><span class="opt-letter">D</span><span class="opt-text">Verificar se o Tomcat possui conexões ativas com essas tabelas antes da operação</span></label>
+      </div>
+    </div>
+
+    <div class="question-card" id="card-6">
+      <div class="q-header"><div class="q-number">06</div><div class="q-title-wrap"><div class="q-title">No script SQL do chamado CP-3962, foi utilizada a seguinte expressão:</div><span class="q-ref">CP-3962</span></div></div>
+      <div class="code-block">LEAD(rh.DATALT) OVER (PARTITION BY rh.NUMCAD ORDER BY rh.DATALT)</div>
+      <div class="sub-q">O que essa expressão faz dentro do contexto do relatório de colaboradores?</div>
+      <div class="options" data-q="6" data-answer="b">
+        <label class="option"><input type="radio" name="q6" value="a"><span class="opt-letter">A</span><span class="opt-text">Retorna a data máxima de alteração de cargo entre todos os colaboradores da empresa</span></label>
+        <label class="option"><input type="radio" name="q6" value="b"><span class="opt-letter">B</span><span class="opt-text">Para cada linha de histórico de cargo de um colaborador, retorna a data de início do próximo cargo desse mesmo colaborador, permitindo calcular o fim do período atual</span></label>
+        <label class="option"><input type="radio" name="q6" value="c"><span class="opt-letter">C</span><span class="opt-text">Agrupa os registros de cargo por colaborador e elimina registros duplicados de data</span></label>
+        <label class="option"><input type="radio" name="q6" value="d"><span class="opt-letter">D</span><span class="opt-text">Converte a data de alteração de cargo para o fuso horário configurado no Oracle</span></label>
+      </div>
+    </div>
+
+    <div class="question-card" id="card-7">
+      <div class="q-header"><div class="q-number">07</div><div class="q-title-wrap"><div class="q-title">O usuário Leonardo, no chamado CP-3962, solicitou que o relatório incluísse tanto colaboradores ativos quanto demitidos. Qual cláusula do script SQL controla o filtro de situação do colaborador?</div><span class="q-ref">CP-3962</span></div></div>
+      <div class="options" data-q="7" data-answer="b">
+        <label class="option"><input type="radio" name="q7" value="a"><span class="opt-letter">A</span><span class="opt-text">WHERE ghe.DATTER = TO_DATE('1900-12-31', 'YYYY-MM-DD')</span></label>
+        <label class="option"><input type="radio" name="q7" value="b"><span class="opt-letter">B</span><span class="opt-text">WHERE fun.SITAFA &lt;&gt; 3</span></label>
+        <label class="option"><input type="radio" name="q7" value="c"><span class="opt-letter">C</span><span class="opt-text">PARTITION BY rh.NUMCAD ORDER BY rh.DATALT</span></label>
+        <label class="option"><input type="radio" name="q7" value="d"><span class="opt-letter">D</span><span class="opt-text">JOIN R583GHE rg ON ghe.CODGHE = rg.CODGHE</span></label>
+      </div>
+    </div>
+
+    <!-- AVANÇADO -->
+    <div class="section-label" style="margin-top:26px"><span class="section-badge badge-hard">🔴 Nível Avançado</span><div class="section-line"></div></div>
+
+    <div class="question-card" id="card-8">
+      <div class="q-header"><div class="q-number">08</div><div class="q-title-wrap"><div class="q-title">No script do chamado CP-3962, o JOIN entre períodos de cargo e GHE foi feito com a condição abaixo. Um analista percebeu que o relatório retorna linhas duplicadas para alguns colaboradores. Qual é a causa mais provável?</div><span class="q-ref">CP-3962</span></div></div>
+      <div class="code-block">ON gp.NUMCAD = cp.id
+AND gp.DATINI &lt;= cp.data_fim_cargo
+AND gp.data_termino_ghe &gt;= cp.data_inicio_cargo</div>
+      <div class="options" data-q="8" data-answer="b">
+        <label class="option"><input type="radio" name="q8" value="a"><span class="opt-letter">A</span><span class="opt-text">O Oracle está com problema de cache e retornando registros repetidos da memória</span></label>
+        <label class="option"><input type="radio" name="q8" value="b"><span class="opt-letter">B</span><span class="opt-text">Um colaborador passou por mais de um GHE durante o mesmo período de cargo, gerando múltiplas combinações válidas no JOIN temporal</span></label>
+        <label class="option"><input type="radio" name="q8" value="c"><span class="opt-letter">C</span><span class="opt-text">O campo NUMCAD não é único na tabela R034FUN e está causando produto cartesiano</span></label>
+        <label class="option"><input type="radio" name="q8" value="d"><span class="opt-letter">D</span><span class="opt-text">A função COALESCE está retornando SYSDATE para todos os registros ativos, forçando duplicidade</span></label>
+      </div>
+    </div>
+
+    <div class="question-card" id="card-9">
+      <div class="q-header"><div class="q-number">09</div><div class="q-title-wrap"><div class="q-title">No chamado CP-5152, a importação de abrangências demorou 3 horas e 20 minutos, enquanto as demais cargas foram concluídas em minutos. Qual hipótese técnica você priorizaria para investigar essa degradação de performance?</div><span class="q-ref">CP-5152</span></div></div>
+      <div class="options" data-q="9" data-answer="b">
+        <label class="option"><input type="radio" name="q9" value="a"><span class="opt-letter">A</span><span class="opt-text">O arquivo de abrangências estava em formato .csv enquanto os demais eram .txt, causando incompatibilidade de parsing no Senior</span></label>
+        <label class="option"><input type="radio" name="q9" value="b"><span class="opt-letter">B</span><span class="opt-text">O volume de linhas era muito superior, ou havia locks concorrentes no banco durante o processo, além de possível ausência de índice nas colunas usadas na importação</span></label>
+        <label class="option"><input type="radio" name="q9" value="c"><span class="opt-letter">C</span><span class="opt-text">O Tomcat atingiu o limite de sessões simultâneas e passou a processar em modo single-thread</span></label>
+        <label class="option"><input type="radio" name="q9" value="d"><span class="opt-letter">D</span><span class="opt-text">O ambiente de homologação possui restrição de horário para operações de carga e o processo entrou em espera automática</span></label>
+      </div>
+    </div>
+
+    <div class="question-card" id="card-10">
+      <div class="q-header"><div class="q-number">10</div><div class="q-title-wrap"><div class="q-title">Após o deploy de nova release no Tomcat, os usuários reportam lentidão extrema e o catalina.out exibe repetidamente:</div><span class="q-ref">Tomcat / JVM</span></div></div>
+      <div class="code-block">java.lang.OutOfMemoryError: Java heap space</div>
+      <div class="sub-q">Qual conjunto de ações representa a abordagem correta de um analista AMS para tratar esse incidente?</div>
+      <div class="options" data-q="10" data-answer="a">
+        <label class="option"><input type="radio" name="q10" value="a"><span class="opt-letter">A</span><span class="opt-text">Reiniciar o Tomcat, aumentar o heap via JAVA_OPTS no setenv.sh (ex: -Xms512m -Xmx2048m) e analisar se há vazamento de memória na nova release comparando com a versão anterior</span></label>
+        <label class="option"><input type="radio" name="q10" value="b"><span class="opt-letter">B</span><span class="opt-text">Reinstalar o JDK no servidor, pois o OutOfMemoryError indica que a versão do Java está corrompida</span></label>
+        <label class="option"><input type="radio" name="q10" value="c"><span class="opt-letter">C</span><span class="opt-text">Deletar o diretório work do Tomcat e redeployar o .war, pois o erro é causado por arquivos temporários acumulados</span></label>
+        <label class="option"><input type="radio" name="q10" value="d"><span class="opt-letter">D</span><span class="opt-text">Aumentar o espaço em disco do servidor, pois Java heap space indica que o disco está cheio</span></label>
+      </div>
+    </div>
+
+    <div class="unanswered-msg" id="unanswered-msg">⚠️ Você ainda possui questões sem resposta. Por favor, responda todas antes de finalizar.</div>
+    <div class="submit-wrap">
+      <button class="submit-btn" onclick="submitQuiz()">Finalizar Prova</button>
+      <p class="submit-note">Após enviar, não será possível alterar suas respostas.</p>
+    </div>
+  </div>
+
+  <!-- RESULTADO -->
+  <div id="result-screen">
+    <div class="result-card">
+      <div class="result-candidate" id="result-candidate">—</div>
+      <div class="result-score" id="result-score">—</div>
+      <div class="result-label">acertos de 10 questões</div>
+      <div id="result-status-badge"></div>
+      <p class="result-msg" id="result-msg"></p>
+      <div id="result-detail"></div>
+      <div class="sent-notice" id="sent-notice" style="display:none"></div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ╔══════════════════════════════════════════════╗
+// ║  ⚙️  CONFIGURAÇÕES — preencha antes de usar  ║
+// ╚══════════════════════════════════════════════╝
+const CONFIG = {
+  emailjs_public_key:  'sLduHySiwwnGiClc2',
+  emailjs_service_id:  'service_99t0dnd',
+  emailjs_template_id: 'template_43zjnph',
+  seu_email:           'fgsilva8@stefanini.com',
+  sheets_url:          'https://script.google.com/u/0/home/projects/1zraxo_EiNi0ByGc3Is_L5jTSzYd_V2MmUS5RPizgns6fDGUjDOweK9le/edit',
+};
+
+emailjs.init(CONFIG.emailjs_public_key);
+
+// Anti-cópia
+document.addEventListener('contextmenu', e=>{e.preventDefault();showAlert()});
+document.addEventListener('keydown', e=>{
+  if((e.ctrlKey||e.metaKey)&&['c','v','a','u','s','p'].includes(e.key.toLowerCase())){e.preventDefault();showAlert()}
+  if(e.key==='F12'||(e.ctrlKey&&e.shiftKey&&['i','j','c'].includes(e.key.toLowerCase()))){e.preventDefault();showAlert()}
+  if(e.key==='PrintScreen'){e.preventDefault();showAlert()}
+});
+document.addEventListener('copy', e=>{e.preventDefault();showAlert()});
+document.addEventListener('cut',  e=>{e.preventDefault();showAlert()});
+document.addEventListener('paste',e=>{e.preventDefault();showAlert()});
+function showAlert(){document.getElementById('cheat-alert').classList.add('show')}
+
+// Inputs permitem seleção
+['f-nome','f-matricula','f-email'].forEach(id=>{
+  const el=document.getElementById(id);
+  el.style.cssText+='user-select:text;-webkit-user-select:text';
+  el.addEventListener('mousedown',e=>e.stopPropagation());
+  el.addEventListener('keydown',  e=>e.stopPropagation());
+});
+
+// Candidato
+let candidato={};
+function startQuiz(){
+  const nome     =document.getElementById('f-nome').value.trim();
+  const matricula=document.getElementById('f-matricula').value.trim();
+  const email    =document.getElementById('f-email').value.trim();
+  const emailOk  =/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  document.getElementById('err-nome').classList.toggle('show',!nome);
+  document.getElementById('err-matricula').classList.toggle('show',!matricula);
+  document.getElementById('err-email').classList.toggle('show',!emailOk);
+  if(!nome||!matricula||!emailOk) return;
+  candidato={nome,matricula,email};
+  document.getElementById('badge-nome').textContent=nome;
+  document.getElementById('badge-info').textContent=`Matrícula: ${matricula} · ${email}`;
+  document.getElementById('id-screen').style.display='none';
+  document.getElementById('quiz-form').style.display='block';
+  startTimer();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// Timer
+let totalSeconds=45*60, timerInterval;
+const timerEl=document.getElementById('timer');
+function startTimer(){
+  timerInterval=setInterval(()=>{
+    totalSeconds--;
+    if(totalSeconds<=0){clearInterval(timerInterval);submitQuiz(true);return}
+    const m=String(Math.floor(totalSeconds/60)).padStart(2,'0');
+    const s=String(totalSeconds%60).padStart(2,'0');
+    timerEl.textContent=`${m}:${s}`;
+    timerEl.className=totalSeconds<=300?'danger':totalSeconds<=600?'warn':'';
+  },1000);
+}
+
+// Respostas
+const answers={};
+const gabarito={1:'b',2:'b',3:'c',4:'b',5:'c',6:'b',7:'b',8:'b',9:'b',10:'a'};
+const labels={
+  1:'Q1 — Log de Importação',   2:'Q2 — Ambiente HOMOLOG',
+  3:'Q3 — Log do Tomcat',       4:'Q4 — Ordem dos DELETEs',
+  5:'Q5 — Boas Práticas DML',   6:'Q6 — Window Function LEAD()',
+  7:'Q7 — Filtro SITAFA',       8:'Q8 — JOIN Temporal',
+  9:'Q9 — Performance de Carga',10:'Q10 — OutOfMemoryError'
+};
+
+document.querySelectorAll('.options').forEach(group=>{
+  const q=group.dataset.q;
+  group.querySelectorAll('.option').forEach(opt=>{
+    opt.addEventListener('click',()=>{
+      opt.querySelector('input').checked=true;
+      group.querySelectorAll('.option').forEach(o=>o.classList.remove('selected'));
+      opt.classList.add('selected');
+      answers[q]=opt.querySelector('input').value;
+      document.getElementById('card-'+q).classList.add('answered');
+      const count=Object.keys(answers).length;
+      document.getElementById('progress-text').textContent=`${count} de 10 respondidas`;
+      document.getElementById('progress-fill').style.width=`${count*10}%`;
+    });
+  });
+});
+
+// Submit
+async function submitQuiz(timeout=false){
+  if(!timeout&&Object.keys(answers).length<10){
+    const msg=document.getElementById('unanswered-msg');
+    msg.classList.add('show');
+    msg.scrollIntoView({behavior:'smooth',block:'center'});
+    return;
+  }
+  clearInterval(timerInterval);
+  let correct=0;
+  const rows=[],lines=[];
+  for(let i=1;i<=10;i++){
+    const ua=answers[i]||'—';
+    const ok=ua===gabarito[i];
+    if(ok)correct++;
+    rows.push(`<div class="detail-row"><span>${labels[i]}</span><span class="${ok?'detail-correct':'detail-wrong'}">${ok?'✓ Correto':'✗ Incorreto'}</span></div>`);
+    lines.push(`${labels[i]}: ${ok?'CORRETO':'INCORRETO'} (marcou:${ua.toUpperCase()} correto:${gabarito[i].toUpperCase()})`);
+  }
+  const pass=correct>=6;
+  const basicOk=[1,2,3].filter(q=>answers[q]===gabarito[q]).length;
+  const advOk  =[8,9,10].filter(q=>answers[q]===gabarito[q]).length;
+  const now=new Date().toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo'});
+  const usado=45*60-totalSeconds;
+  const tempo=`${String(Math.floor(usado/60)).padStart(2,'0')}:${String(usado%60).padStart(2,'0')}`;
+  let msg=pass?'Parabéns! Você atingiu a pontuação mínima necessária. ':'Pontuação abaixo do mínimo exigido (6 acertos). ';
+  if(basicOk<2) msg+='Menos de 2 questões básicas acertadas — critério eliminatório. ';
+  if(advOk===0) msg+='Nenhuma questão avançada acertada — recomendamos aprofundar estudos.';
+
+  document.getElementById('quiz-form').style.display='none';
+  const rs=document.getElementById('result-screen');
+  rs.classList.add('show');
+  document.getElementById('result-candidate').textContent=`${candidato.nome} · Matrícula: ${candidato.matricula} · ${candidato.email}`;
+  document.getElementById('result-score').textContent=`${correct}/10`;
+  document.getElementById('result-detail').innerHTML=rows.join('');
+  document.getElementById('result-msg').textContent=msg;
+  document.getElementById('result-status-badge').innerHTML=`<span class="result-status ${pass?'status-pass':'status-fail'}">${pass?'✓ APROVADO':'✗ NÃO APROVADO'}</span>`;
+  rs.scrollIntoView({behavior:'smooth'});
+
+  const payload={
+    nome:candidato.nome, matricula:candidato.matricula, email:candidato.email,
+    pontuacao:`${correct}/10`, resultado:pass?'APROVADO':'NÃO APROVADO',
+    data_hora:now, tempo_gasto:tempo,
+    basicas_ok:`${basicOk}/3`, avancadas_ok:`${advOk}/3`,
+    detalhamento:lines.join('\n'), mensagem:msg
+  };
+
+  document.getElementById('sending-overlay').classList.add('show');
+  const [r1,r2]=await Promise.allSettled([enviarEmail(payload),enviarSheets(payload)]);
+  document.getElementById('sending-overlay').classList.remove('show');
+
+  const eOk=r1.status==='fulfilled';
+  const sOk=r2.status==='fulfilled';
+  const notice=document.getElementById('sent-notice');
+  notice.style.display='block';
+  if(eOk&&sOk){
+    notice.textContent='✅ Resultado enviado por e-mail e registrado na planilha com sucesso.';
+  } else {
+    notice.style.borderColor='rgba(245,200,66,.3)';
+    notice.style.color='#f5c842';
+    notice.textContent=`⚠️ Envio parcial — E-mail: ${eOk?'✓':'✗'}  Planilha: ${sOk?'✓':'✗'}. Registre o resultado manualmente.`;
+  }
+}
+
+async function enviarEmail(p){
+  return emailjs.send(CONFIG.emailjs_service_id,CONFIG.emailjs_template_id,{
+    to_email:CONFIG.seu_email,
+    nome:p.nome, matricula:p.matricula, email_cand:p.email,
+    pontuacao:p.pontuacao, resultado:p.resultado, data_hora:p.data_hora,
+    tempo_gasto:p.tempo_gasto, basicas_ok:p.basicas_ok, avancadas_ok:p.avancadas_ok,
+    detalhamento:p.detalhamento, mensagem:p.mensagem
+  });
+}
+async function enviarSheets(p){
+  return fetch(CONFIG.sheets_url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)});
+}
+</script>
+</body>
+</html>
