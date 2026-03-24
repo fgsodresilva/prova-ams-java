@@ -138,7 +138,7 @@
 <header>
   <div class="header-inner">
     <div class="brand"><div class="brand-dot"></div><span class="brand-text">Avaliação Técnica · AMS Java</span></div>
-    <div id="timer">45:00</div>
+    <div id="timer">24:00:00</div>
   </div>
 </header>
 
@@ -181,7 +181,7 @@
       </div>
       <div class="meta-grid">
         <div class="meta-item"><div class="meta-label">Questões</div><div class="meta-value">10</div></div>
-        <div class="meta-item"><div class="meta-label">Duração</div><div class="meta-value">45 min</div></div>
+        <div class="meta-item"><div class="meta-label">Duração</div><div class="meta-value">24 horas</div></div>
         <div class="meta-item"><div class="meta-label">Aprovação</div><div class="meta-value">≥ 6 acertos</div></div>
       </div>
     </div>
@@ -349,7 +349,7 @@ AND gp.data_termino_ghe &gt;= cp.data_inicio_cargo</div>
 // ================================================================
 //  Cole aqui a URL gerada pelo Google Apps Script após implantar
 // ================================================================
-const APPS_SCRIPT_URL = 'SUA_URL_DO_APPS_SCRIPT_AQUI';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxqmKM5iQTIlNHfum_z4l0FMpzSM9u83Xe-3ZZwoSFkf_dmIV69urKK9yeH4k5hq1k-4Q/exec';
 
 // Anti-cópia
 document.addEventListener('contextmenu',e=>{e.preventDefault();showAlert()});
@@ -389,15 +389,16 @@ function startQuiz(){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-let totalSeconds=45*60, timerInterval;
+let totalSeconds=26*60*60, timerInterval;
 const timerEl=document.getElementById('timer');
 function startTimer(){
   timerInterval=setInterval(()=>{
     totalSeconds--;
     if(totalSeconds<=0){clearInterval(timerInterval);submitQuiz(true);return}
-    const m=String(Math.floor(totalSeconds/60)).padStart(2,'0');
+    const m=String(Math.floor(totalSeconds/3600)).padStart(2,'0');
+    const s=String(totalSeconds%3600).padStart(2,'0');
     const s=String(totalSeconds%60).padStart(2,'0');
-    timerEl.textContent=`${m}:${s}`;
+    timerEl.textContent=`${h}:${m}:${s}`;
     timerEl.className=totalSeconds<=300?'danger':totalSeconds<=600?'warn':'';
   },1000);
 }
