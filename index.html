@@ -524,7 +524,7 @@ async function enviarEmail(p){
   });
 }
 async function enviarSheets(p){
-  return fetch(CONFIG.sheets_url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)});
+  return fetch(CONFIG.sheets_url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/json'},body:JSON.stringify(p)});
 }
 </script>
 </body>
