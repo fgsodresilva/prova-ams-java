@@ -26,7 +26,7 @@
   .brand-dot{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);animation:pulse 2s infinite}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
   .brand-text{font-size:.76rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
-  #timer{font-family:'JetBrains Mono',monospace;font-size:.95rem;font-weight:600;color:var(--accent);background:rgba(79,142,247,.08);border:1px solid rgba(79,142,247,.2);border-radius:8px;padding:6px 16px;letter-spacing:.05em;transition:color .3s,border-color .3s}
+  #timer{font-family:'JetBrains Mono',monospace;font-size:.9rem;font-weight:600;color:var(--accent);background:rgba(79,142,247,.08);border:1px solid rgba(79,142,247,.2);border-radius:8px;padding:6px 14px;letter-spacing:.04em;transition:color .3s,border-color .3s}
   #timer.warn{color:var(--yellow);border-color:rgba(245,200,66,.3)}
   #timer.danger{color:var(--red);border-color:rgba(242,92,92,.35);animation:blink .8s infinite}
   @keyframes blink{0%,100%{opacity:1}50%{opacity:.5}}
@@ -91,8 +91,6 @@
   .submit-note{font-size:.72rem;color:var(--muted);margin-top:10px}
   .unanswered-msg{background:rgba(245,200,66,.08);border:1px solid rgba(245,200,66,.25);color:var(--yellow);border-radius:8px;padding:12px 16px;font-size:.8rem;margin-top:12px;display:none}
   .unanswered-msg.show{display:block}
-
-  /* ── Tela de agradecimento ── */
   #thank-screen{display:none}
   #thank-screen.show{display:flex;align-items:center;justify-content:center;min-height:60vh}
   .thank-card{background:linear-gradient(135deg,#0f1e14,#0d1628);border:1px solid rgba(62,207,114,.25);border-radius:20px;padding:56px 48px;text-align:center;max-width:540px;margin:40px auto;position:relative;overflow:hidden}
@@ -109,15 +107,7 @@
   .thank-info-value{font-size:.85rem;font-weight:600;color:var(--text)}
   .thank-footer{font-size:.76rem;color:var(--muted);line-height:1.7;background:rgba(79,142,247,.04);border:1px solid rgba(79,142,247,.12);border-radius:8px;padding:14px 16px}
   .thank-footer strong{color:var(--accent)}
-
-  @media(max-width:600px){
-    .meta-grid{grid-template-columns:1fr 1fr}
-    #id-screen,.hero{padding:24px 18px}
-    main{padding:18px 12px 60px}
-    .question-card{padding:18px 14px 14px}
-    .thank-card{padding:36px 24px}
-    .thank-info-grid{grid-template-columns:1fr}
-  }
+  @media(max-width:600px){.meta-grid{grid-template-columns:1fr 1fr}#id-screen,.hero{padding:24px 18px}main{padding:18px 12px 60px}.question-card{padding:18px 14px 14px}.thank-card{padding:36px 24px}.thank-info-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -317,7 +307,7 @@ AND gp.data_termino_ghe &gt;= cp.data_inicio_cargo</div>
     </div>
   </div>
 
-  <!-- TELA DE AGRADECIMENTO (candidato vê isso) -->
+  <!-- TELA DE AGRADECIMENTO -->
   <div id="thank-screen">
     <div class="thank-card">
       <div class="thank-icon">✓</div>
@@ -330,7 +320,7 @@ AND gp.data_termino_ghe &gt;= cp.data_inicio_cargo</div>
       <div class="thank-info-grid">
         <div class="thank-info-item">
           <div class="thank-info-label">Prazo de retorno</div>
-          <div class="thank-info-value">Até 48 horas</div>
+          <div class="thank-info-value">Até 24 horas</div>
         </div>
         <div class="thank-info-item">
           <div class="thank-info-label">Horário de envio</div>
@@ -349,146 +339,171 @@ AND gp.data_termino_ghe &gt;= cp.data_inicio_cargo</div>
 // ================================================================
 //  Cole aqui a URL gerada pelo Google Apps Script após implantar
 // ================================================================
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxqmKM5iQTIlNHfum_z4l0FMpzSM9u83Xe-3ZZwoSFkf_dmIV69urKK9yeH4k5hq1k-4Q/exec';
+const APPS_SCRIPT_URL = 'SUA_URL_DO_APPS_SCRIPT_AQUI';
 
 // Anti-cópia
-document.addEventListener('contextmenu',e=>{e.preventDefault();showAlert()});
-document.addEventListener('keydown',e=>{
-  if((e.ctrlKey||e.metaKey)&&['c','v','a','u','s','p'].includes(e.key.toLowerCase())){e.preventDefault();showAlert()}
-  if(e.key==='F12'||(e.ctrlKey&&e.shiftKey&&['i','j','c'].includes(e.key.toLowerCase()))){e.preventDefault();showAlert()}
-  if(e.key==='PrintScreen'){e.preventDefault();showAlert()}
+document.addEventListener('contextmenu', function(e){ e.preventDefault(); showAlert(); });
+document.addEventListener('keydown', function(e){
+  if((e.ctrlKey||e.metaKey) && ['c','v','a','u','s','p'].includes(e.key.toLowerCase())){ e.preventDefault(); showAlert(); }
+  if(e.key==='F12' || (e.ctrlKey && e.shiftKey && ['i','j','c'].includes(e.key.toLowerCase()))){ e.preventDefault(); showAlert(); }
+  if(e.key==='PrintScreen'){ e.preventDefault(); showAlert(); }
 });
-document.addEventListener('copy',e=>{e.preventDefault();showAlert()});
-document.addEventListener('cut', e=>{e.preventDefault();showAlert()});
-document.addEventListener('paste',e=>{e.preventDefault();showAlert()});
-function showAlert(){document.getElementById('cheat-alert').classList.add('show')}
+document.addEventListener('copy',  function(e){ e.preventDefault(); showAlert(); });
+document.addEventListener('cut',   function(e){ e.preventDefault(); showAlert(); });
+document.addEventListener('paste', function(e){ e.preventDefault(); showAlert(); });
 
-['f-nome','f-matricula','f-email'].forEach(id=>{
-  const el=document.getElementById(id);
-  el.style.cssText+='user-select:text;-webkit-user-select:text';
-  el.addEventListener('mousedown',e=>e.stopPropagation());
-  el.addEventListener('keydown', e=>e.stopPropagation());
+function showAlert(){
+  document.getElementById('cheat-alert').classList.add('show');
+}
+
+// Inputs permitem digitação
+['f-nome','f-matricula','f-email'].forEach(function(id){
+  var el = document.getElementById(id);
+  el.style.userSelect = 'text';
+  el.style.webkitUserSelect = 'text';
+  el.addEventListener('mousedown', function(e){ e.stopPropagation(); });
+  el.addEventListener('keydown',   function(e){ e.stopPropagation(); });
 });
 
-let candidato={};
+// Candidato
+var candidato = {};
+
 function startQuiz(){
-  const nome     =document.getElementById('f-nome').value.trim();
-  const matricula=document.getElementById('f-matricula').value.trim();
-  const email    =document.getElementById('f-email').value.trim();
-  const emailOk  =/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  document.getElementById('err-nome').classList.toggle('show',!nome);
-  document.getElementById('err-matricula').classList.toggle('show',!matricula);
-  document.getElementById('err-email').classList.toggle('show',!emailOk);
-  if(!nome||!matricula||!emailOk)return;
-  candidato={nome,matricula,email};
-  document.getElementById('badge-nome').textContent=nome;
-  document.getElementById('badge-info').textContent=`Matrícula: ${matricula} · ${email}`;
-  document.getElementById('id-screen').style.display='none';
-  document.getElementById('quiz-form').style.display='block';
+  var nome      = document.getElementById('f-nome').value.trim();
+  var matricula = document.getElementById('f-matricula').value.trim();
+  var email     = document.getElementById('f-email').value.trim();
+  var emailOk   = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  document.getElementById('err-nome').classList.toggle('show', !nome);
+  document.getElementById('err-matricula').classList.toggle('show', !matricula);
+  document.getElementById('err-email').classList.toggle('show', !emailOk);
+
+  if(!nome || !matricula || !emailOk) return;
+
+  candidato = { nome: nome, matricula: matricula, email: email };
+  document.getElementById('badge-nome').textContent = nome;
+  document.getElementById('badge-info').textContent = 'Matrícula: ' + matricula + ' · ' + email;
+  document.getElementById('id-screen').style.display = 'none';
+  document.getElementById('quiz-form').style.display = 'block';
   startTimer();
-  window.scrollTo({top:0,behavior:'smooth'});
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-let totalSeconds=26*60*60, timerInterval;
-const timerEl=document.getElementById('timer');
+// Timer 24h
+var totalSeconds = 24 * 60 * 60;
+var timerInterval;
+var timerEl = document.getElementById('timer');
+
 function startTimer(){
-  timerInterval=setInterval(()=>{
+  timerInterval = setInterval(function(){
     totalSeconds--;
-    if(totalSeconds<=0){clearInterval(timerInterval);submitQuiz(true);return}
-    const m=String(Math.floor(totalSeconds/3600)).padStart(2,'0');
-    const s=String(totalSeconds%3600).padStart(2,'0');
-    const s=String(totalSeconds%60).padStart(2,'0');
-    timerEl.textContent=`${h}:${m}:${s}`;
-    timerEl.className=totalSeconds<=300?'danger':totalSeconds<=600?'warn':'';
-  },1000);
+    if(totalSeconds <= 0){
+      clearInterval(timerInterval);
+      submitQuiz(true);
+      return;
+    }
+    var h = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+    var m = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+    var s = String(totalSeconds % 60).padStart(2, '0');
+    timerEl.textContent = h + ':' + m + ':' + s;
+    if(totalSeconds <= 1800) timerEl.className = 'danger';
+    else if(totalSeconds <= 3600) timerEl.className = 'warn';
+    else timerEl.className = '';
+  }, 1000);
 }
 
-const answers={};
-const gabarito={1:'b',2:'b',3:'c',4:'b',5:'c',6:'b',7:'b',8:'b',9:'b',10:'a'};
-const labels={
-  1:'Q1 — Log de Importação',   2:'Q2 — Ambiente HOMOLOG',
-  3:'Q3 — Log do Tomcat',       4:'Q4 — Ordem dos DELETEs',
-  5:'Q5 — Boas Práticas DML',   6:'Q6 — Window Function LEAD()',
-  7:'Q7 — Filtro SITAFA',       8:'Q8 — JOIN Temporal',
-  9:'Q9 — Performance de Carga',10:'Q10 — OutOfMemoryError'
+// Respostas
+var answers = {};
+var gabarito = {1:'b',2:'b',3:'c',4:'b',5:'c',6:'b',7:'b',8:'b',9:'b',10:'a'};
+var labels = {
+  1:'Q1 — Log de Importação',    2:'Q2 — Ambiente HOMOLOG',
+  3:'Q3 — Log do Tomcat',        4:'Q4 — Ordem dos DELETEs',
+  5:'Q5 — Boas Práticas DML',    6:'Q6 — Window Function LEAD()',
+  7:'Q7 — Filtro SITAFA',        8:'Q8 — JOIN Temporal',
+  9:'Q9 — Performance de Carga', 10:'Q10 — OutOfMemoryError'
 };
 
-document.querySelectorAll('.options').forEach(group=>{
-  const q=group.dataset.q;
-  group.querySelectorAll('.option').forEach(opt=>{
-    opt.addEventListener('click',()=>{
-      opt.querySelector('input').checked=true;
-      group.querySelectorAll('.option').forEach(o=>o.classList.remove('selected'));
+document.querySelectorAll('.options').forEach(function(group){
+  var q = group.dataset.q;
+  group.querySelectorAll('.option').forEach(function(opt){
+    opt.addEventListener('click', function(){
+      opt.querySelector('input').checked = true;
+      group.querySelectorAll('.option').forEach(function(o){ o.classList.remove('selected'); });
       opt.classList.add('selected');
-      answers[q]=opt.querySelector('input').value;
-      document.getElementById('card-'+q).classList.add('answered');
-      const c=Object.keys(answers).length;
-      document.getElementById('progress-text').textContent=`${c} de 10 respondidas`;
-      document.getElementById('progress-fill').style.width=`${c*10}%`;
+      answers[q] = opt.querySelector('input').value;
+      document.getElementById('card-' + q).classList.add('answered');
+      var c = Object.keys(answers).length;
+      document.getElementById('progress-text').textContent = c + ' de 10 respondidas';
+      document.getElementById('progress-fill').style.width = (c * 10) + '%';
     });
   });
 });
 
-async function submitQuiz(timeout=false){
-  if(!timeout&&Object.keys(answers).length<10){
-    const m=document.getElementById('unanswered-msg');
-    m.classList.add('show');
-    m.scrollIntoView({behavior:'smooth',block:'center'});
+// Submit
+function submitQuiz(timeout){
+  if(!timeout && Object.keys(answers).length < 10){
+    var msg = document.getElementById('unanswered-msg');
+    msg.classList.add('show');
+    msg.scrollIntoView({ behavior: 'smooth', block: 'center' });
     return;
   }
   clearInterval(timerInterval);
 
-  // Calcula resultado (invisível para o candidato — vai apenas no e-mail)
-  let correct=0;
-  const lines=[];
-  for(let i=1;i<=10;i++){
-    const ua=answers[i]||'—';
-    const ok=ua===gabarito[i];
-    if(ok)correct++;
-    lines.push(`${labels[i]}: ${ok?'CORRETO':'INCORRETO'} (marcou:${ua.toUpperCase()} correto:${gabarito[i].toUpperCase()})`);
+  var correct = 0;
+  var lines = [];
+  for(var i = 1; i <= 10; i++){
+    var ua = answers[i] || '—';
+    var ok = ua === gabarito[i];
+    if(ok) correct++;
+    lines.push(labels[i] + ': ' + (ok ? 'CORRETO' : 'INCORRETO') + ' (marcou:' + ua.toUpperCase() + ' correto:' + gabarito[i].toUpperCase() + ')');
   }
-  const pass=correct>=6;
-  const basicOk=[1,2,3].filter(q=>answers[q]===gabarito[q]).length;
-  const advOk  =[8,9,10].filter(q=>answers[q]===gabarito[q]).length;
-  const now=new Date().toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo'});
-  const usado=45*60-totalSeconds;
-  const tempo=`${String(Math.floor(usado/60)).padStart(2,'0')}:${String(usado%60).padStart(2,'0')}`;
-  let msg=pass?'Parabéns! Pontuação mínima atingida. ':'Pontuação abaixo do mínimo exigido (6 acertos). ';
-  if(basicOk<2)msg+='Menos de 2 questões básicas acertadas — critério eliminatório. ';
-  if(advOk===0)msg+='Nenhuma questão avançada acertada.';
+  var pass     = correct >= 6;
+  var basicOk  = [1,2,3].filter(function(q){ return answers[q] === gabarito[q]; }).length;
+  var advOk    = [8,9,10].filter(function(q){ return answers[q] === gabarito[q]; }).length;
+  var now      = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+  var usado    = 24*60*60 - totalSeconds;
+  var th       = String(Math.floor(usado / 3600)).padStart(2,'0');
+  var tm       = String(Math.floor((usado % 3600) / 60)).padStart(2,'0');
+  var ts2      = String(usado % 60).padStart(2,'0');
+  var tempo    = th + ':' + tm + ':' + ts2;
+  var obs      = pass ? 'Pontuação mínima atingida. ' : 'Pontuação abaixo do mínimo (6 acertos). ';
+  if(basicOk < 2) obs += 'Menos de 2 básicas acertadas — critério eliminatório. ';
+  if(advOk === 0)  obs += 'Nenhuma questão avançada acertada.';
 
-  // Esconde quiz e mostra overlay de envio
-  document.getElementById('quiz-form').style.display='none';
+  // Esconde quiz, mostra overlay
+  document.getElementById('quiz-form').style.display = 'none';
   document.getElementById('sending-overlay').classList.add('show');
 
-  const payload={
-    nome:candidato.nome,matricula:candidato.matricula,email:candidato.email,
-    pontuacao:`${correct}/10`,resultado:pass?'APROVADO':'NÃO APROVADO',
-    data_hora:now,tempo_gasto:tempo,
-    basicas_ok:`${basicOk}/3`,avancadas_ok:`${advOk}/3`,
-    detalhamento:lines.join('\n'),mensagem:msg
+  var payload = {
+    nome:         candidato.nome,
+    matricula:    candidato.matricula,
+    email:        candidato.email,
+    pontuacao:    correct + '/10',
+    resultado:    pass ? 'APROVADO' : 'NÃO APROVADO',
+    data_hora:    now,
+    tempo_gasto:  tempo,
+    basicas_ok:   basicOk + '/3',
+    avancadas_ok: advOk + '/3',
+    detalhamento: lines.join('\n'),
+    mensagem:     obs
   };
 
-  try{
-    await fetch(APPS_SCRIPT_URL,{
-      method:'POST',
-      mode:'no-cors',
-      headers:{'Content-Type':'text/plain'},
-      body:JSON.stringify(payload)
-    });
-  }catch(err){
-    // Mesmo com erro de rede, mostra a tela de agradecimento normalmente
-    console.error('Erro no envio:', err);
-  }
-
-  // Sempre mostra agradecimento — resultado fica só no e-mail/planilha
-  document.getElementById('sending-overlay').classList.remove('show');
-  document.getElementById('thank-name').textContent=candidato.nome;
-  document.getElementById('thank-email').textContent=candidato.email;
-  document.getElementById('thank-hora').textContent=now;
-  const ts=document.getElementById('thank-screen');
-  ts.classList.add('show');
-  window.scrollTo({top:0,behavior:'smooth'});
+  fetch(APPS_SCRIPT_URL, {
+    method:  'POST',
+    mode:    'no-cors',
+    headers: { 'Content-Type': 'text/plain' },
+    body:    JSON.stringify(payload)
+  })
+  .catch(function(err){ console.error('Erro no envio:', err); })
+  .finally(function(){
+    document.getElementById('sending-overlay').classList.remove('show');
+    document.getElementById('thank-name').textContent  = candidato.nome;
+    document.getElementById('thank-email').textContent = candidato.email;
+    document.getElementById('thank-hora').textContent  = now;
+    var ts = document.getElementById('thank-screen');
+    ts.classList.add('show');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
 }
 </script>
 </body>
